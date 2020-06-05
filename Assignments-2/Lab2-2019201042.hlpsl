@@ -1,0 +1,164 @@
+role user(U:agent,G:agent,S:agent,H:hash_func,SND,RCV:channel(dy))
+played_by U
+def=
+	local
+		State:nat,
+		Id:text,   %userId
+		Pwd:text,  %password
+		Ts1:nat,  %timestamp
+		Kgwn:text,
+		TEi:nat,
+		Ts4:nat,
+		Ki:text,
+		Kj:text,
+		SIdj:text,
+		Ts6:nat,
+		Ts5:nat
+	init
+		State:=0
+	transition
+		1. State=0 /\ RCV(start) =|> State':=1 
+		/\ Id' := new() %ammu 
+		/\ Pwd' := new() %123 
+		/\ SND(Id'.Ts1.H(Ts1.H(Pwd')))
+		2. State=1 /\ RCV(xor(H(Kgwn'.H(Id'.TEi').TEi'),H(Pwd'))) =|> State':=2
+		/\ Ki':= new()
+		/\ SND(xor(Id',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4)).
+		H(xor(H(Id'.Ts4),H(Kgwn'.H(Id'.TEi').TEi'))).
+		(xor(Ki',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4))).
+		Ts4.
+		TEi'.
+		H(Id'.TEi'))
+		3. State=2 /\ RCV(SIdj'
+		.Ts6
+		.H(Kj'.Id'.SIdj'.Ts6)
+		.xor(Kj',H(xor(xor(Ki',H(H(Kgwn'.SIdj').Ts5)), H(H(Kgwn'.SIdj').Ts5)).Ts6))) =|> State':=3
+end role    
+
+role server(U:agent,G:agent,S:agent,H:hash_func,SND,RCV:channel(dy))
+played_by S
+def=
+	local
+		State:nat,
+		SIdj:text,
+		Pwdj:text,
+		Ts2:nat,
+		Ts3:nat,
+		Ts4:nat,
+		Ts5:nat,
+		Ts6:nat,
+		Id:text,
+		Kgwn:text,
+		TEi:nat,
+		Ki:text,
+		Kj:text
+	init
+		State:=0
+	transition
+		1. State=0 /\ RCV(start) =|> State':=1
+		/\ SIdj' := new()
+		/\ Pwdj' := new()
+		/\ SND(SIdj'.Ts2.H(Ts2.H(Pwdj')))
+		2. State=1 /\ RCV(xor(H(Kgwn'.SIdj'),H(H(Pwdj').Ts3))) =|> State':=2
+		3. State=2 /\ RCV(Ts5
+		.xor(Id',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4))
+		.xor(Id',H(xor(Id',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4)).H(Kgwn'.SIdj').Ts4))
+		.H(Id'.H(Kgwn'.SIdj').Ts5)
+		.xor(Ki',H(H(Kgwn'.SIdj').Ts5))
+		) =|> State':=3 
+		/\ Kj' :=new()
+		/\ SND(SIdj'
+		.Ts6
+		.H(Kj'.Id'.SIdj'.Ts6)
+		.xor(Kj',H(xor(xor(Ki',H(H(Kgwn'.SIdj').Ts5)), H(H(Kgwn'.SIdj').Ts5)).Ts6))
+		)
+end role  
+
+role gateway(U:agent,G:agent,S:agent,H:hash_func,SND,RCV:channel(dy))
+played_by G
+def=
+	local
+		State:nat,
+		Id:text,   %userId
+		Pwd:text,  %password
+		Ts1:nat,   %timestamp
+		Tgwn:nat,   %timestamp
+		TEi:nat,
+		Kgwn:text,    %private to gwn
+		
+		SIdj:text,
+		Pwdj:text,
+		Ts2:nat,
+		Ts3:nat,
+		
+		Ts4:nat,
+		Ki:text,
+		
+		Ts5:nat,
+		Ts6:nat,
+		Kj:text
+		
+	init
+		State:=0
+	transition
+		1. State=0 /\ RCV(Id'.Ts1.H(Ts1.H(Pwd'))) =|> State':=1
+		/\ TEi':=new()
+		/\ Kgwn':=new()
+		/\ secret({Kgwn'}, sub1, G)
+		/\ SND(xor(H(Kgwn'.H(Id'.TEi').TEi'),H(Pwd')))
+		2. State=1 /\ RCV(SIdj'.Ts2.H(Ts2.H(Pwdj'))) =|> State':=2
+		/\ SND(xor(H(Kgwn'.SIdj'),H(H(Pwdj').Ts3)))
+		3. State=2 /\ RCV(xor(Id',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4)).
+		H(xor(H(Id'.Ts4),H(Kgwn'.H(Id'.TEi').TEi'))).
+		(xor(Ki',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4))).
+		Ts4.
+		TEi'.
+		H(Id'.TEi')) =|> State':=3 
+		/\ SND(Ts5
+		.xor(Id',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4))
+		.xor(Id',H(xor(Id',H(H(Kgwn'.H(Id'.TEi').TEi').Ts4)).H(Kgwn'.SIdj').Ts4))
+		.H(Id'.H(Kgwn'.SIdj').Ts5)
+		.xor(Ki',H(H(Kgwn'.SIdj').Ts5))
+		)
+		4. State=3 /\ RCV(SIdj'
+		.Ts6
+		.H(Kj'.Id'.SIdj'.Ts6)
+		.xor(Kj',H(xor(xor(Ki',H(H(Kgwn'.SIdj').Ts5)), H(H(Kgwn'.SIdj').Ts5)).Ts6))
+		)  =|> State':=4
+		/\ SND(SIdj'
+		.Ts6
+		.H(Kj'.Id'.SIdj'.Ts6)
+		.xor(Kj',H(xor(xor(Ki',H(H(Kgwn'.SIdj').Ts5)), H(H(Kgwn'.SIdj').Ts5)).Ts6)))
+		
+end role
+
+
+role session(U:agent,G:agent,S:agent,H:hash_func)
+def=
+	local
+		SND3,RCV3,SND2,RCV2,SND1,RCV1:channel(dy)
+	composition
+                user(U,G,S,H,SND1,RCV1) 
+                /\ gateway(U,G,S,H,SND2,RCV2) 
+                /\ server(U,G,S,H,SND3,RCV3) 
+end role
+
+
+role environment()
+def=
+	const
+		user_1,gateway_1,server_1: agent,
+		h:hash_func,
+		sub1:protocol_id
+	intruder_knowledge = {user_1,gateway_1,server_1,h}
+	composition
+		session(user_1,gateway_1,server_1,h)
+end role
+
+goal
+	secrecy_of sub1
+end goal
+
+environment()
+	
+		

@@ -1,0 +1,27 @@
+Name: S.Praveena
+Roll.No: 2019201042
+SNS avipsa assignment-2
+
+
+SUMMARY
+  SAFE
+
+DETAILS
+  BOUNDED_NUMBER_OF_SESSIONS
+  TYPED_MODEL
+
+PROTOCOL
+  /home/praveena/span-1.6-linux64-ubuntu/span/testsuite/results/sample.if
+
+GOAL
+  As specified
+
+BACKEND
+  CL-AtSe
+
+STATISTICS
+
+  Analysed   : 63 states
+  Reachable  : 63 states
+  Translation: 0.03 seconds
+  Computation: 2.43 seconds
